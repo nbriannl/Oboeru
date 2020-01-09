@@ -1,12 +1,10 @@
 import pandas as pd
 import random
-import keyboard
 from enum import Enum
 import time
 from os import system, name
 
 def clear(): 
-  
     # for windows 
     if name == 'nt': 
         _ = system('cls') 
@@ -24,10 +22,23 @@ class Main:
             "Type 'quit' to quit'")
         while True:
             command = input()
-            if command == 'start' or command == 's':
+            if command == 'start10' or command == 's10':
                 print('Starting quiz!\n\n')
                 quiz = Quiz(vocabulary)
-                quiz.start()
+                quiz.start(10)
+                print('Quiz over!')
+                print("Oboeru - 'It's time to 覚える!'\n"
+                    "Type 'start' to start quiz\n"
+                    "Type 'quit' to quit'")
+            
+            if command == 'startall' or command == 's':
+                print('Starting quiz!\n\n')
+                quiz = Quiz(vocabulary)
+                quiz.startall()
+                print('Quiz over!')
+                print("Oboeru - 'It's time to 覚える!'\n"
+                    "Type 'start' to start quiz\n"
+                    "Type 'quit' to quit'")
 
             if command == 'quit' or command == 'q':
                 print('Quiting program')
@@ -35,20 +46,25 @@ class Main:
         
 class Quiz:
     def __init__(self, vocabulary):
-        self.numTotalQuestions = vocabulary.getVocabularySize()
+        self.numTotalQuestions = 0
         self.numIncorrect = 0
         self.numCorrect = 0
         self.vocabulary = vocabulary
         self.report = '...'
     
-    def start(self):
-        for index in range(self.vocabulary.getVocabularySize()):
+    def startall(self):
+        self.start(self.vocabulary.getVocabularySize())
+
+    def start(self, size):
+        indices = random.sample(range(self.vocabulary.getVocabularySize()), size)
+        self.numTotalQuestions = size
+        for index in indices:
             mcqqn = McqQuestion(index, 'jp', self.vocabulary)
             clear()
             self.printProgress()
             mcqqn.showQuestion()
             while True:
-                event = keyboard.read_key()
+                event = input()
                 if mcqqn.numOptions == 3:
                     if event == '1' or event == '2' or event == '3':
                         break
@@ -57,7 +73,8 @@ class Quiz:
                         break
             isCorrect, report = mcqqn.answerQuestion(event)
             self.updateProgress(isCorrect, report)
-            time.sleep(0.5)
+        print('\n====Final Summary====')
+        self.printProgress()
 
     def printProgress(self):
         numLeft = self.numTotalQuestions - self.numCorrect - self.numIncorrect
@@ -66,6 +83,7 @@ class Quiz:
         print('Wrong:', self.numIncorrect)
         print('Total', self.numTotalQuestions)
         print('Previous word:', self.report)
+        print('\n=====================\n')
 
     def updateProgress(self, isCorrect, report):
         if isCorrect:
