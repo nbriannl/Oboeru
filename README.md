@@ -17,7 +17,11 @@ I have yet to make a `requirements.txt`, but this project uses `pandas` to load 
 
 Ensure that the font used in the console can print asian fonts, such as MS Gothic, MS Mincho or NSimSun.
 
-Download or clone the repo and open your command line inside `/project` folder and type the command `python main.py` to run the program
+Download or clone the repo 
+
+Open your command line inside `/project` folder 
+
+Run the program by typing the command `python main.py`
 
 ## How to Use
 Type any of the options to start a quiz. Enter the desired options when prompted. While in a quiz, answer 'q' to quit the quiz.
