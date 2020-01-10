@@ -23,24 +23,31 @@ class CLI:
 class Main:
     def main(self):
         clearCli()
-        vocabulary = Vocabulary()
+        self.vocabulary = Vocabulary()
+        vocabulary = self.vocabulary
         vocabulary.buildVocabulary()
         hasTypedInvalidCommand = False
         while True:
+            quiz = Quiz(vocabulary)
             clearCli()
             print(CLI.main_menu)
             if hasTypedInvalidCommand:
                 print(CLI.invalid_command)
             command = input()
             hasTypedInvalidCommand = False
-            if command == 'start10' or command == 's':
+            if command == 'start all' or command == 'sa':
                 print('Starting quiz!\n\n')
-                quiz = Quiz(vocabulary)
-                quiz.start(10, 'jp')
-            elif command == 'startall' or command == 'sa':
-                print('Starting quiz!\n\n')
-                quiz = Quiz(vocabulary)
                 quiz.startall('jp')
+            elif command == 'start 10 jp' or command == 'sj' :
+                print('Starting quiz!\n\n')
+                quiz.start(10, 'jp')
+            elif command == 'start 10 en' or command == 'sj':
+                print('Starting quiz!\n\n')
+                quiz.start(10, 'en')
+            elif command == 'start custom' or command == 'sc' or command == 's':
+                numQuestions, language = self.selectCustomQuizOptions()
+                print('Starting quiz!\n\n')
+                quiz.start(numQuestions, language)
             elif command == 'quit' or command == 'q':
                 print('Quiting program')
                 break
@@ -48,7 +55,48 @@ class Main:
                 vocabulary.buildVocabulary()
             else:
                 hasTypedInvalidCommand = True
+    
+    def selectCustomQuizOptions(self):
+        hasTypedInvalidCommand = False
+        hasNumberExceededVocabSize = False
+        while True:
+            clearCli()
+            print('How many questions?')
+            if hasTypedInvalidCommand:
+                print(CLI.invalid_command)
+            if hasNumberExceededVocabSize:
+                print('Invalid value. Vocabulary size is', self.vocabulary.getVocabularySize())
+            command = input()
+            hasTypedInvalidCommand = False
+            hasNumberExceededVocabSize = False  
+            try:
+                if 1 <= int(command) <= self.vocabulary.getVocabularySize():
+                    break
+                else:
+                    hasNumberExceededVocabSize = True
+            except ValueError:
+                hasTypedInvalidCommand = True
         
+        numQuestions = int(command)
+
+        hasTypedInvalidCommand = False
+        hasNumberExceededVocabSize = False
+        while True:
+            clearCli()
+            print('Language of questions? (jp/en)')
+            if hasTypedInvalidCommand:
+                print(CLI.invalid_command)
+            command = input()
+            hasTypedInvalidCommand = False
+            if command == 'jp' or command == 'en':
+                break
+            else:
+                hasTypedInvalidCommand = True
+
+        language = command
+
+        return numQuestions, language
+
 class Quiz:
     def __init__(self, vocabulary):
         self.vocabulary = vocabulary
