@@ -20,80 +20,71 @@ class CLI:
             "Type 'quit' to quit!'")
     invalid_command = 'Invalid command'
     invalid_answer = 'Invalid answer'
+
 class Main:
     def main(self):
         clearCli()
         self.vocabulary = Vocabulary()
         vocabulary = self.vocabulary
         vocabulary.buildVocabulary()
-        hasTypedInvalidCommand = False
+
+        isValidCommand = True
         while True:
             quiz = Quiz(vocabulary)
             clearCli()
             print(CLI.main_menu)
-            if hasTypedInvalidCommand:
+            if not isValidCommand:
                 print(CLI.invalid_command)
             command = input()
-            hasTypedInvalidCommand = False
-            if command == 'start all' or command == 'sa':
-                print('Starting quiz!\n\n')
-                quiz.startall('jp')
-            elif command == 'start 10 jp' or command == 'sj' :
-                print('Starting quiz!\n\n')
-                quiz.start(10, 'jp')
-            elif command == 'start 10 en' or command == 'sj':
-                print('Starting quiz!\n\n')
-                quiz.start(10, 'en')
-            elif command == 'start custom' or command == 'sc' or command == 's':
-                numQuestions, language = self.selectCustomQuizOptions()
-                print('Starting quiz!\n\n')
-                quiz.start(numQuestions, language)
-            elif command == 'quit' or command == 'q':
-                print('Quiting program')
-                break
-            elif command == 't':
-                vocabulary.buildVocabulary()
-            else:
-                hasTypedInvalidCommand = True
+            isValidCommand = command in ['sa', 's10jp', 's10en', 'sc', 's', 'q', 't']
+            if isValidCommand:
+                if command == 'sa':
+                    print('Starting quiz!\n\n')
+                    quiz.startall('jp')
+                elif command == 's10jp' :
+                    print('Starting quiz!\n\n')
+                    quiz.start(10, 'jp')
+                elif command == 's10en':
+                    print('Starting quiz!\n\n')
+                    quiz.start(10, 'en')
+                elif command == 'sc' or command == 's':
+                    numQuestions, language = self.selectCustomQuizOptions()
+                    print('Starting quiz!\n\n')
+                    quiz.start(numQuestions, language)
+                elif command == 'q':
+                    print('Quiting program')
+                    break
+                elif command == 't':
+                    vocabulary.buildVocabulary()
     
     def selectCustomQuizOptions(self):
-        hasTypedInvalidCommand = False
-        hasNumberExceededVocabSize = False
+        clearCli()
+        print('How many questions?')
         while True:
+            value = input()
+            isANumber = value.isnumeric()
+            isNumberWithinVocabSize = isANumber and 1 <= int(value) <= self.vocabulary.getVocabularySize()
+            if isNumberWithinVocabSize:
+                break
             clearCli()
             print('How many questions?')
-            if hasTypedInvalidCommand:
-                print(CLI.invalid_command)
-            if hasNumberExceededVocabSize:
+            if not isANumber: 
+                print('Not a number')
+            elif isANumber and not isNumberWithinVocabSize:
                 print('Invalid value. Vocabulary size is', self.vocabulary.getVocabularySize())
-            command = input()
-            hasTypedInvalidCommand = False
-            hasNumberExceededVocabSize = False  
-            try:
-                if 1 <= int(command) <= self.vocabulary.getVocabularySize():
-                    break
-                else:
-                    hasNumberExceededVocabSize = True
-            except ValueError:
-                hasTypedInvalidCommand = True
-        
-        numQuestions = int(command)
+        numQuestions = int(value)
 
-        hasTypedInvalidCommand = False
-        hasNumberExceededVocabSize = False
+        clearCli()
+        print('Language of questions? (jp/en)')
         while True:
+            value = input()
+            isValidInput = value == 'jp' or value == 'en'
+            if isValidInput:
+                break
             clearCli()
             print('Language of questions? (jp/en)')
-            if hasTypedInvalidCommand:
-                print(CLI.invalid_command)
-            command = input()
-            hasTypedInvalidCommand = False
-            if command == 'jp' or command == 'en':
-                break
-            else:
-                hasTypedInvalidCommand = True
-
-        language = command
+            print(CLI.invalid_command)
+        language = value
 
         return numQuestions, language
 
