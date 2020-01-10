@@ -16,8 +16,12 @@ def clearCli():
 class CLI:
     main_menu = ("Oboeru - 'It's time to 覚える!'\n"
             "========Main Menu========\n"
-            "Type 'start' or 's' to start quiz\n"
-            "Type 'quit' to quit!'")
+            "Options:\n"
+            "'sa' to start quiz for all vocabulary till Japanese 3\n"
+            "'s' to start a quiz with custom size\n"
+            "'sl' to start a quiz according to Lessons based on みんなの日本語\n"
+            "'j1' or 'j2' or 'j3' to test vocabulary for the respective Japanese modules"
+            "Type 'q' to quit'")
     invalid_command = 'Invalid command'
     invalid_answer = 'Invalid answer'
 
@@ -36,28 +40,40 @@ class Main:
             if not isValidCommand:
                 print(CLI.invalid_command)
             command = input()
-            isValidCommand = command in ['sa', 's10jp', 's10en', 'sc', 's', 'q', 't']
+            isValidCommand = command in ['sa', 's', 'sl', 'q', 'j1', 'j2', 'j3']
             if isValidCommand:
                 if command == 'sa':
                     print('Starting quiz!\n\n')
-                    quiz.startall('jp')
-                elif command == 's10jp' :
+                    language = self.selectLanguage()
+                    quiz.startall(language)
+                elif command == 's':
+                    numQuestions = self.selectNumQuestions()
+                    language = self.selectLanguage()
                     print('Starting quiz!\n\n')
-                    quiz.start(10, 'jp')
-                elif command == 's10en':
+                    quiz.start(language, numQuestions)
+                elif command == 'sl':
+                    startLesson, endLesson = self.selectLessons()
+                    language = self.selectLanguage()
                     print('Starting quiz!\n\n')
-                    quiz.start(10, 'en')
-                elif command == 'sc' or command == 's':
-                    numQuestions, language = self.selectCustomQuizOptions()
-                    print('Starting quiz!\n\n')
-                    quiz.start(numQuestions, language)
+                    quiz.start(language, startLesson=startLesson, endLesson=endLesson)
+                elif command == 'j1':
+                    language = self.selectLanguage()
+                    print('Starting quiz for Japanese 1 vocabulary!\n\n')
+                    quiz.start(language, startLesson=1, endLesson=10)
+                elif command == 'j2':
+                    language = self.selectLanguage()
+                    print('Starting quiz for Japanese 2 vocabulary!\n\n')
+                    quiz.start(language, startLesson=11, endLesson=20)
+                elif command == 'j3':
+                    language = self.selectLanguage()
+                    print('Starting quiz for Japanese 3 vocabulary!\n\n')
+                    quiz.start(language, startLesson=21, endLesson=31)
                 elif command == 'q':
                     print('Quiting program')
                     break
-                elif command == 't':
-                    vocabulary.buildVocabulary()
+
     
-    def selectCustomQuizOptions(self):
+    def selectNumQuestions(self):
         clearCli()
         print('How many questions?')
         while True:
@@ -73,7 +89,9 @@ class Main:
             elif isANumber and not isNumberWithinVocabSize:
                 print('Invalid value. Vocabulary size is', self.vocabulary.getVocabularySize())
         numQuestions = int(value)
+        return numQuestions
 
+    def selectLanguage(self):
         clearCli()
         print('Language of questions? (jp/en)')
         while True:
@@ -84,9 +102,73 @@ class Main:
             clearCli()
             print('Language of questions? (jp/en)')
             print(CLI.invalid_command)
-        language = value
+        return value
 
-        return numQuestions, language
+    def selectLessons(self):
+        clearCli()
+        print('(s)ingle or (r)ange of lessons? (s/r)')
+        while True:
+            value = input()
+            isValidInput = value == 's' or value == 'r'
+            if isValidInput:
+                break
+            clearCli()
+            print('(s)ingle or (r)ange of lessons? (s/r)')
+            print(CLI.invalid_command)
+        if value == 's':
+            startLesson, endLesson = self.selectSingleLesson()
+        elif value == 'r':
+            startLesson, endLesson = self.selectRangeOfLessons()
+        return startLesson, endLesson
+    
+    def selectSingleLesson(self):
+        clearCli()
+        print('Type lesson number?')
+        while True:
+            value = input()
+            isValidInput = self.vocabulary.hasLesson(int(value))
+            if isValidInput:
+                print('Valid lesson', value)
+                break
+            clearCli()
+            print('Type lesson number?')
+            print('Lesson does not exist')
+        selectedLesson = value
+        return selectedLesson , selectedLesson
+
+    def selectRangeOfLessons(self):
+        clearCli()
+        print('Type start lesson number?')
+        while True:
+            value = input()
+            isValidInput = self.vocabulary.hasLesson(int(value))
+            if isValidInput:
+                print('Valid lesson', value)
+                break
+            clearCli()
+            print('Type start lesson number?')
+            print('Lesson does not exist')
+        startLesson = value
+
+        clearCli()
+        print('Start lesson: ', startLesson)
+        print('Type end lesson number?')
+        while True:
+            value = input()
+            isLargerThanStart = int(value) > int(startLesson) 
+            doesLessonExist = self.vocabulary.hasLesson(int(value))
+            isValidInput = isLargerThanStart and doesLessonExist
+            if isValidInput:
+                print('Valid lesson', value)
+                break
+            clearCli()
+            print('Start lesson: ', startLesson)
+            print('Type end lesson number?')
+            if not doesLessonExist: print('Lesson does not exist')
+            elif not isLargerThanStart: print('End lesson should be greater than start lesson')
+        endLesson = value
+        assert int(endLesson) > int(startLesson)
+        return startLesson, endLesson
 
 class Quiz:
     def __init__(self, vocabulary):
@@ -97,11 +179,15 @@ class Quiz:
         self.report = '...'
     
     def startall(self, qnLanguage):
-        self.start(self.vocabulary.getVocabularySize(), qnLanguage)
+        self.start(qnLanguage, self.vocabulary.getVocabularySize())
 
-    def start(self, size, qnLanguage):
-        indices = random.sample(range(self.vocabulary.getVocabularySize()), size)
-        self.numTotalQuestions = size
+    def start(self, qnLanguage, numQuestions=None, startLesson=None, endLesson=None):
+        if numQuestions is not None and startLesson is None and endLesson is None:
+            indices = random.sample(range(self.vocabulary.getVocabularySize()), numQuestions)
+            self.numTotalQuestions = numQuestions
+        elif numQuestions is None and startLesson is not None and endLesson is not None:
+            indices = self.buildIndicesFromLessons(startLesson, endLesson)
+            self.numTotalQuestions = len(indices)
         for index in indices:
             mcqqn = McqQuestion(index, qnLanguage, self.vocabulary)
             clearCli()
@@ -127,6 +213,14 @@ class Quiz:
         self.printProgress()
         print('Quiz Ended!')
         input("Press Enter to continue...")
+
+    def buildIndicesFromLessons(self, startLesson, endLesson):
+        indices = []
+        for lessonNum in range(int(startLesson), int(endLesson) + 1):
+            indicesFromLesson = self.vocabulary.lessonList[lessonNum]
+            indices = indices + indicesFromLesson
+        indices = random.sample(indices, len(indices))
+        return indices
 
     def updateProgress(self, isCorrect, mcqqn):
         if isCorrect:
@@ -225,6 +319,9 @@ class Vocabulary:
 
     def getWord(self, index):
         return self.wordList[index]
+
+    def hasLesson(self, lessonNumber):
+        return lessonNumber in self.lessonList
 
     def get3WordsSimilarPos(self, index):
         similarWords = []
