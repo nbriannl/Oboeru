@@ -4,7 +4,7 @@ from enum import Enum
 import time
 from os import system, name
 
-def clear(): 
+def clearCli(): 
     # for windows 
     if name == 'nt': 
         _ = system('cls') 
@@ -13,32 +13,30 @@ def clear():
     else: 
         _ = system('clear') 
 
+class CLI:
+    main_menu = ("Oboeru - 'It's time to 覚える!'\n"
+            "========Main Menu========\n"
+            "Type 'start' to start quiz\n"
+            "Type 'quit' to quit!'")
+
 class Main:
     def main(self):
+        clearCli()
         vocabulary = Vocabulary()
         vocabulary.buildVocabulary()
-        print("Oboeru - 'It's time to 覚える!'\n"
-            "Type 'start' to start quiz\n"
-            "Type 'quit' to quit'")
+        clearCli()
+        print(CLI.main_menu)
         while True:
             command = input()
-            if command == 'start10' or command == 's10':
+            if command == 'start10' or command == 's':
                 print('Starting quiz!\n\n')
                 quiz = Quiz(vocabulary)
                 quiz.start(10)
-                print('Quiz over!')
-                print("Oboeru - 'It's time to 覚える!'\n"
-                    "Type 'start' to start quiz\n"
-                    "Type 'quit' to quit'")
             
-            if command == 'startall' or command == 's':
+            if command == 'startall' or command == 'sa':
                 print('Starting quiz!\n\n')
                 quiz = Quiz(vocabulary)
                 quiz.startall()
-                print('Quiz over!')
-                print("Oboeru - 'It's time to 覚える!'\n"
-                    "Type 'start' to start quiz\n"
-                    "Type 'quit' to quit'")
 
             if command == 'quit' or command == 'q':
                 print('Quiting program')
@@ -60,7 +58,7 @@ class Quiz:
         self.numTotalQuestions = size
         for index in indices:
             mcqqn = McqQuestion(index, 'jp', self.vocabulary)
-            clear()
+            clearCli()
             self.printProgress()
             mcqqn.showQuestion()
             while True:
@@ -73,8 +71,11 @@ class Quiz:
                         break
             isCorrect, report = mcqqn.answerQuestion(event)
             self.updateProgress(isCorrect, report)
-        print('\n====Final Summary====')
+        clearCli()        
         self.printProgress()
+        print('Quiz Over!')
+        print('Press enter to continue')
+        input()
 
     def printProgress(self):
         numLeft = self.numTotalQuestions - self.numCorrect - self.numIncorrect
@@ -178,9 +179,6 @@ class Vocabulary:
             similarWord = self.getWord(index)
             similarWords.append(similarWord)
 
-        # print('given', word.japanese, word.partOfSpeech)
-        # for similarWord in similarWords: 
-        #     print('similar:', similarWord.__str__())
         return similarWords
 
 class Word:
