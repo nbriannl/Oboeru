@@ -20,7 +20,7 @@ class CLI:
             "'sa' to start quiz for all vocabulary till Japanese 3\n"
             "'s' to start a quiz with custom size\n"
             "'sl' to start a quiz according to Lessons based on みんなの日本語\n"
-            "'j1' or 'j2' or 'j3' to test vocabulary for the respective Japanese modules"
+            "'j1' or 'j2' or 'j3' to test vocabulary for the respective Japanese modules\n"
             "Type 'q' to quit'")
     invalid_command = 'Invalid command'
     invalid_answer = 'Invalid answer'
