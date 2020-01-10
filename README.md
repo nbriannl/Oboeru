@@ -25,7 +25,7 @@ Type any of the options to start a quiz. Enter the desired options when prompted
 ## How to add Vocabulary
 To update the vocabulary, simply open and edit `vocab.xlsx`
 
-### Fields
+## Fields
 The excel file was originally made by me for Japanese 3 revision, hence not all fields are used in the current version of the application. It would be best however to fill up all fields when adding vocabulary as future functionality may use these.
 
 ⊛ indicates a required field for the current version of the program.
@@ -49,3 +49,6 @@ The excel file was originally made by me for Japanese 3 revision, hence not all 
 - **suruMeaning:** The meaning of the word when added with する 
 
 If you have added entries to the excel sheet. Feel free to share it under Issues or email me at neilbrian.nl@gmail.com 
+
+## How to Contribute
+If you would like to work on this project. Do fork and PR any changes. It'll be amazing if you're a 日本語 学生 as well.
