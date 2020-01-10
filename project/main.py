@@ -104,26 +104,25 @@ class Quiz:
         self.numTotalQuestions = size
         for index in indices:
             mcqqn = McqQuestion(index, qnLanguage, self.vocabulary)
-            hasTypedInvalidAnswer = False
+            clearCli()
+            self.printProgress()
+            mcqqn.printQuestion()
             while True:
+                value = input()
+                isValidOption = value  == '1' or value == '2' or value == '3' or (value == '4' and mcqqn.numOptions == 4)
+                isValidQuitCommand = value == 'q' 
+                isValidValue = isValidOption or isValidQuitCommand
+                if isValidValue:
+                    break
                 clearCli()
                 self.printProgress()
                 mcqqn.printQuestion()
-                if hasTypedInvalidAnswer:
-                    print(CLI.invalid_answer)
-                event = input()
-                # should i do validilty check here
-                hasTypedInvalidAnswer = False
-                if event == 'q' or event == '1' or event == '2' or event == '3':
-                    break
-                elif event == '4' and mcqqn.numOptions == 4:
-                    break
-                else:
-                    hasTypedInvalidAnswer = True
-            if event == 'q':
+                print(CLI.invalid_answer)
+            if value == 'q':
                 break
-            isCorrect = mcqqn.answerQuestion(event)
+            isCorrect = mcqqn.answerQuestion(value)
             self.updateProgress(isCorrect, mcqqn)
+        
         clearCli()        
         self.printProgress()
         print('Quiz Ended!')
