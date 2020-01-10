@@ -14,8 +14,7 @@ This project was developed with `Python 3.7.4`. Please ensure a compatible versi
 
 This project is developed on Windows. I am not sure whether this is compatible with other operating systems.
 
-I have yet to make a `requirements.txt`, but this project uses `pandas` to load the vocabulary excel file into the program.
-`pip install panda` 
+I have yet to make a `requirements.txt`, but this project uses `pandas` to load the vocabulary excel file into the program. `pip install panda` should do fine.
 
 Ensure that the font used in the console can print asian fonts, such as MS Gothic, MS Mincho or NSimSun.
 
