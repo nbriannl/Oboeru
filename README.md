@@ -5,7 +5,7 @@ Oboeru (The romanization of the Japanese 覚える, which means ‘to remember�
 
 **Why not use Anki or [insert App name here]?**
 
-__I get asked and probably will get asked this a lot.__ 
+_I get asked and probably will get asked this a lot._ 
 
 Oboeru fills up the other MCQ options with words of similar parts of speech. Plus generation of over 1200 Anki cards would be to tedious. In fact, for most existing options, conversion of my excel sheet to their cards would be too difficult. Plus I decided to do this a fun project before my last semester starts.
 
