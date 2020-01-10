@@ -16,66 +16,90 @@ def clearCli():
 class CLI:
     main_menu = ("Oboeru - 'It's time to 覚える!'\n"
             "========Main Menu========\n"
-            "Type 'start' to start quiz\n"
+            "Type 'start' or 's' to start quiz\n"
             "Type 'quit' to quit!'")
-
+    invalid_command = 'Invalid command'
+    invalid_answer = 'Invalid answer'
 class Main:
     def main(self):
         clearCli()
         vocabulary = Vocabulary()
         vocabulary.buildVocabulary()
-        clearCli()
-        print(CLI.main_menu)
+        hasTypedInvalidCommand = False
         while True:
+            clearCli()
+            print(CLI.main_menu)
+            if hasTypedInvalidCommand:
+                print(CLI.invalid_command)
             command = input()
+            hasTypedInvalidCommand = False
             if command == 'start10' or command == 's':
                 print('Starting quiz!\n\n')
                 quiz = Quiz(vocabulary)
-                quiz.start(10)
-            
-            if command == 'startall' or command == 'sa':
+                quiz.start(10, 'jp')
+            elif command == 'startall' or command == 'sa':
                 print('Starting quiz!\n\n')
                 quiz = Quiz(vocabulary)
-                quiz.startall()
-
-            if command == 'quit' or command == 'q':
+                quiz.startall('jp')
+            elif command == 'quit' or command == 'q':
                 print('Quiting program')
                 break
+            elif command == 't':
+                vocabulary.buildVocabulary()
+            else:
+                hasTypedInvalidCommand = True
         
 class Quiz:
     def __init__(self, vocabulary):
+        self.vocabulary = vocabulary
         self.numTotalQuestions = 0
         self.numIncorrect = 0
         self.numCorrect = 0
-        self.vocabulary = vocabulary
         self.report = '...'
     
-    def startall(self):
-        self.start(self.vocabulary.getVocabularySize())
+    def startall(self, qnLanguage):
+        self.start(self.vocabulary.getVocabularySize(), qnLanguage)
 
-    def start(self, size):
+    def start(self, size, qnLanguage):
         indices = random.sample(range(self.vocabulary.getVocabularySize()), size)
         self.numTotalQuestions = size
         for index in indices:
-            mcqqn = McqQuestion(index, 'jp', self.vocabulary)
-            clearCli()
-            self.printProgress()
-            mcqqn.showQuestion()
+            mcqqn = McqQuestion(index, qnLanguage, self.vocabulary)
+            hasTypedInvalidAnswer = False
             while True:
+                clearCli()
+                self.printProgress()
+                mcqqn.printQuestion()
+                if hasTypedInvalidAnswer:
+                    print(CLI.invalid_answer)
                 event = input()
-                if mcqqn.numOptions == 3:
-                    if event == '1' or event == '2' or event == '3':
-                        break
+                # should i do validilty check here
+                hasTypedInvalidAnswer = False
+                if event == 'q' or event == '1' or event == '2' or event == '3':
+                    break
+                elif event == '4' and mcqqn.numOptions == 4:
+                    break
                 else:
-                    if event == '1' or event == '2' or event == '3' or event == '4':
-                        break
-            isCorrect, report = mcqqn.answerQuestion(event)
-            self.updateProgress(isCorrect, report)
+                    hasTypedInvalidAnswer = True
+            if event == 'q':
+                break
+            isCorrect = mcqqn.answerQuestion(event)
+            self.updateProgress(isCorrect, mcqqn)
         clearCli()        
         self.printProgress()
-        print('Quiz Over!')
-        print('Press enter to continue')
-        input()
+        print('Quiz Ended!')
+        input("Press Enter to continue...")
+
+    def updateProgress(self, isCorrect, mcqqn):
+        if isCorrect:
+            self.numCorrect += 1
+        else:
+            self.numIncorrect += 1
+        if isCorrect:
+            report = 'Correct! ' + mcqqn.questionWord + ' means ' + mcqqn.correctAnswer
+        else:
+            report = 'Wrong! ' + mcqqn.questionWord + ' means ' + mcqqn.correctAnswer
+        self.report = report
 
     def printProgress(self):
         numLeft = self.numTotalQuestions - self.numCorrect - self.numIncorrect
@@ -86,15 +110,16 @@ class Quiz:
         print('Previous word:', self.report)
         print('\n=====================\n')
 
-    def updateProgress(self, isCorrect, report):
-        if isCorrect:
-            self.numCorrect += 1
-        else:
-            self.numIncorrect += 1
-        self.report = report
 
 class McqQuestion:
     def __init__(self, index, fromLanguage, vocabulary):
+        self.questionWord = None
+        self.correctAnswer = None
+        self.otherAnswers = None
+        self.numOptions = None
+        self.correctOption = None
+        self.options = None
+        
         self.vocabulary = vocabulary
         self.getQuestionWordAndCorrectAnswer(index, fromLanguage)
         self.getOtherAnswers(index, fromLanguage)
@@ -132,7 +157,7 @@ class McqQuestion:
         options.insert(self.correctOption, self.correctAnswer)
         self.options = options
 
-    def showQuestion(self):
+    def printQuestion(self):
         print(self.questionWord)
         if self.numOptions >= 1:
             print("1)", self.options[0])
@@ -140,25 +165,22 @@ class McqQuestion:
             print("2)", self.options[1])
         if self.numOptions >= 3:
             print("3)", self.options[2])
-        if self.numOptions >= 3:
+        if self.numOptions >= 4:
             print("4)", self.options[3])
         # print('Correct Answer:', str(self.correctOption + 1))
 
     def answerQuestion(self, selectedOption):
         isCorrect = int(selectedOption) == self.correctOption + 1
-        if isCorrect:
-            report = 'Correct! ' + self.questionWord + ' means ' + self.correctAnswer
-        else:
-            report = 'Wrong! ' + self.questionWord + ' means ' + self.correctAnswer
-        return isCorrect, report
+        return isCorrect
 
 class Vocabulary:
     def __init__(self):
         self.wordList = []
         self.partOfSpeechList = {}
+        self.lessonList = {}
 
     def buildVocabulary(self):
-        self.wordList, self.partOfSpeechList = VocabularyBuilder().buildVocabulary('vocab.xlsx')
+        self.wordList, self.partOfSpeechList, self.lessonList = VocabularyBuilder().buildVocabulary('vocab.xlsx')
 
     def getVocabularySize(self):
         return len(self.wordList)
@@ -213,28 +235,34 @@ class VocabularyBuilder:
         print('Vocabulary file loaded')
         wordList = []
         partOfSpeechList = {}
+        lessonList = {}
         for index, row in df.iterrows():
             splitPOS = self.parsePartOfSpeech(row['pos'])
             if self.checkValidData(row):
+                lessonNum = row['lesson']
                 word = Word(row['japanese'], row['english'], row['lesson'], splitPOS)
                 wordList.append(word)
+                
                 indexOfAddedWord = len(wordList) - 1
+                if lessonNum not in lessonList:
+                    indices = []
+                else:
+                    indices = lessonList[lessonNum] 
+                indices.append(indexOfAddedWord)
+                lessonList[lessonNum] = indices
                 for pos in splitPOS:
                     if pos not in partOfSpeechList:
                         indices = []
-                        indices.append(indexOfAddedWord)
-                        partOfSpeechList[pos] = indices
                     else:
                         indices = partOfSpeechList[pos]
-                        indices.append(indexOfAddedWord)
-                        partOfSpeechList[pos] = indices
+                    indices.append(indexOfAddedWord)
+                    partOfSpeechList[pos] = indices
         
         for posType in PartOfSpeech:
             for index in partOfSpeechList[posType]:
-                #print(wordList[index].__str__())
                 assert posType in wordList[index].partOfSpeech
         print('Vocabulary built')
-        return wordList, partOfSpeechList
+        return wordList, partOfSpeechList, lessonList
 
     def checkValidData(self, rowData):
         listColNames = ['lesson','japanese', 'english']
