@@ -30,7 +30,7 @@ Type any of the options to start a quiz. Enter the desired options when prompted
 ## How to add Vocabulary
 To update the vocabulary, simply open and edit `vocab.xlsx`
 
-## Fields
+### Fields
 The excel file was originally made by me for Japanese 3 revision, hence not all fields are used in the current version of the application. It would be best however to fill up all fields when adding vocabulary as future functionality may use these.
 
 ⊛ indicates a required field for the current version of the program.
