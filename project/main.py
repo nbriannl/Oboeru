@@ -332,7 +332,7 @@ class OpenEndedQuestion:
 
     def printQuestion(self):
         print(self.questionWord)
-        print('>>>', self.correctAnswer, '>>>', self.correctAnswer_all_hiragana)
+        #print('>>>', self.correctAnswer, '>>>', self.correctAnswer_all_hiragana)
 
     def answerQuestion(self, input):
         kksi = kakasi()
