@@ -1,17 +1,20 @@
 import pandas as pd
+from pykakasi import kakasi
 import random
 from enum import Enum
 import time
 from os import system, name
 
-def clearCli(): 
-    # for windows 
-    if name == 'nt': 
-        _ = system('cls') 
-  
-    # for mac and linux(here, os.name is 'posix') 
-    else: 
-        _ = system('clear') 
+
+def clearCli():
+    # for windows
+    if name == 'nt':
+        _ = system('cls')
+
+    # for mac and linux(here, os.name is 'posix')
+    else:
+        _ = system('clear')
+
 
 class CLI:
     main_menu = ("Oboeru - 'It's time to 覚える!'\n"
@@ -24,6 +27,7 @@ class CLI:
             "Type 'q' to quit'")
     invalid_command = 'Invalid command'
     invalid_answer = 'Invalid answer'
+
 
 class Main:
     def main(self):
@@ -40,7 +44,7 @@ class Main:
             if not isValidCommand:
                 print(CLI.invalid_command)
             command = input()
-            isValidCommand = command in ['sa', 's', 'sl', 'q', 'j1', 'j2', 'j3']
+            isValidCommand = command in ['sa', 's', 'sl', 'q', 'j1', 'j2', 'j3', 'la', 't', 'o']
             if isValidCommand:
                 if command == 'sa':
                     print('Starting quiz!\n\n')
@@ -55,7 +59,8 @@ class Main:
                     startLesson, endLesson = self.selectLessons()
                     language = self.selectLanguage()
                     print('Starting quiz!\n\n')
-                    quiz.start(language, startLesson=startLesson, endLesson=endLesson)
+                    quiz.start(language, startLesson=startLesson,
+                               endLesson=endLesson)
                 elif command == 'j1':
                     language = self.selectLanguage()
                     print('Starting quiz for Japanese 1 vocabulary!\n\n')
@@ -71,7 +76,31 @@ class Main:
                 elif command == 'q':
                     print('Quiting program')
                     break
+                elif command == 'la':
+                    print('Listing all vocabulary')
+                    vocabulary.printWholeVocabulary()
+                elif command == 't':
+                    print('Test')
+                    self.testFunction()
+                elif command == 'o':
+                    print('Starting open ended quiz')
+                    startLesson, endLesson = self.selectLessons()
+                    quiz.start_open_ended(startLesson=startLesson, endLesson=endLesson)
 
+    def testFunction(self):
+        kksi = kakasi()
+        kksi.setMode("J", "H")
+        conv = kksi.getConverter()
+        all_hiragana = 'がくせい'
+        partial_hiragana1 = '学せい'
+        partial_hiragana2 = 'がく生'
+        all_kanji = '学生'
+        print(conv.do(all_hiragana))
+        print(conv.do(partial_hiragana1))
+        print(conv.do(partial_hiragana2))
+        print(conv.do(all_kanji))  
+        print(conv.do(all_hiragana) == conv.do(partial_hiragana1) == conv.do(partial_hiragana2) == conv.do(all_kanji))
+        input()
     
     def selectNumQuestions(self):
         clearCli()
@@ -213,6 +242,33 @@ class Quiz:
         self.printProgress()
         print('Quiz Ended!')
         input("Press Enter to continue...")
+    
+    def start_open_ended(self, startLesson=None, endLesson=None):
+        indices = self.buildIndicesFromLessons(startLesson, endLesson)
+        self.numTotalQuestions = len(indices)
+        for index in indices:
+            open_ended_qn = OpenEndedQuestion(index, self.vocabulary)
+            clearCli()
+            self.printProgress()
+            open_ended_qn.printQuestion()
+            while True:
+                value = input()
+                isValidValue = True
+                if isValidValue:
+                    break
+                clearCli()
+                self.printProgress()
+                open_ended_qn.printQuestion()
+                print(CLI.invalid_answer)
+            if value == 'q':
+                break
+            isCorrect = open_ended_qn.answerQuestion(value)
+            self.updateProgressOpenEnded(isCorrect, open_ended_qn, value)
+        
+        clearCli()        
+        self.printProgress()
+        print('Quiz Ended!')
+        input("Press Enter to continue...")
 
     def buildIndicesFromLessons(self, startLesson, endLesson):
         indices = []
@@ -221,6 +277,22 @@ class Quiz:
             indices = indices + indicesFromLesson
         indices = random.sample(indices, len(indices))
         return indices
+
+    def updateProgressOpenEnded(self, isCorrect, open_ended_qn, value):
+        if isCorrect:
+            self.numCorrect += 1
+        else:
+            self.numIncorrect += 1
+        
+        if isCorrect:
+            report = ('Correct! ' + open_ended_qn.questionWord + ' means ' + open_ended_qn.correctAnswer + '\n' +
+                'You typed ' + open_ended_qn.inputAnswer + ' >>converted>> ' + open_ended_qn.inputAnswer_all_hiragana + '\n' +
+                'Answer is ' + open_ended_qn.correctAnswer + ' >>converted>> ' + open_ended_qn.correctAnswer_all_hiragana)
+        else:
+            report = ('Wrong! ' + open_ended_qn.questionWord + ' means ' + open_ended_qn.correctAnswer + '\n' +
+                'You typed ' + open_ended_qn.inputAnswer + ' >>converted>> ' + open_ended_qn.inputAnswer_all_hiragana + '\n' +
+                'Answer is ' + open_ended_qn.correctAnswer + ' >>converted>> ' + open_ended_qn.correctAnswer_all_hiragana)
+        self.report = report
 
     def updateProgress(self, isCorrect, mcqqn):
         if isCorrect:
@@ -241,6 +313,36 @@ class Quiz:
         print('Total', self.numTotalQuestions)
         print('Previous word:', self.report)
         print('\n=====================\n')
+
+# Open ended questions are aways english word, give japanese answer.
+class OpenEndedQuestion:
+    def __init__(self, index, vocabulary):
+        self.questionWord = None
+        self.correctAnswer = None
+        self.correctAnswer_all_hiragana = None
+        self.inputAnswer = None
+        self.inputAnswer_all_hiragana = None
+
+        self.vocabulary = vocabulary
+        self.getQuestionWordAndCorrectAnswer(index)
+        
+    def getQuestionWordAndCorrectAnswer(self, index):
+        word = self.vocabulary.getWord(index)
+        self.questionWord, self.correctAnswer, self.correctAnswer_all_hiragana = word.english, word.japanese, word.japanese_all_hiragana
+
+    def printQuestion(self):
+        print(self.questionWord)
+        print('>>>', self.correctAnswer, '>>>', self.correctAnswer_all_hiragana)
+
+    def answerQuestion(self, input):
+        kksi = kakasi()
+        kksi.setMode("J", "H") 
+        conv = kksi.getConverter()
+        convertedInput_all_hiragana = conv.do(input)
+        self.inputAnswer = input
+        self.inputAnswer_all_hiragana = convertedInput_all_hiragana
+        isCorrect = convertedInput_all_hiragana == self.correctAnswer_all_hiragana
+        return isCorrect   
 
 
 class McqQuestion:
@@ -320,6 +422,11 @@ class Vocabulary:
     def getWord(self, index):
         return self.wordList[index]
 
+    def printWholeVocabulary(self):
+        for word in self.wordList:
+            print(word.__str__())
+        x = input()
+
     def hasLesson(self, lessonNumber):
         return lessonNumber in self.lessonList
 
@@ -339,15 +446,16 @@ class Vocabulary:
         return similarWords
 
 class Word:
-    def __init__(self, japanese, english, lesson, partOfSpeech):
-        #print(japanese, english, lesson, partOfSpeech)
+    def __init__(self, japanese, japanese_all_hiragana, english, lesson, partOfSpeech):
+        # print(japanese, english, lesson, partOfSpeech)
         self.japanese = japanese
+        self.japanese_all_hiragana = japanese_all_hiragana
         self.english = english
         self.lesson = lesson
         self.partOfSpeech = partOfSpeech
 
     def __str__(self):
-        return self.japanese + ' ' + self.english + ' ' + str(self.lesson) + ' ' + ''.join(str(self.partOfSpeech))
+        return self.japanese + ' ' + self.japanese_all_hiragana + ' ' + self.english + ' ' + str(self.lesson) + ' ' + ''.join(str(self.partOfSpeech))
 
 # [nan 'n' 'exp' 'v' 'adverb' 'な-adj' 'い-adj' 'な-adj, n' 'adverb, n', 'counter']
 class PartOfSpeech(Enum):
@@ -371,11 +479,15 @@ class VocabularyBuilder:
         wordList = []
         partOfSpeechList = {}
         lessonList = {}
+        kksi = kakasi()
+        kksi.setMode("J","H")
         for index, row in df.iterrows():
             splitPOS = self.parsePartOfSpeech(row['pos'])
             if self.checkValidData(row):
                 lessonNum = row['lesson']
-                word = Word(row['japanese'], row['english'], row['lesson'], splitPOS)
+                conv = kksi.getConverter()
+                japanese_all_hiragana = conv.do(row['japanese'])
+                word = Word(row['japanese'], japanese_all_hiragana, row['english'], row['lesson'], splitPOS)
                 wordList.append(word)
                 
                 indexOfAddedWord = len(wordList) - 1
