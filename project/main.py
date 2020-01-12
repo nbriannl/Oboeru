@@ -70,7 +70,7 @@ class Main:
                 elif command == 'j3':
                     language = self.selectLanguage()
                     print('Starting quiz for Japanese 3 vocabulary!\n\n')
-                    quiz.start(language, startLesson=21, endLesson=31)
+                    quiz.start(language, startLesson=21, endLesson=32)
                 elif command == 'q':
                     print('Quiting program')
                     break
