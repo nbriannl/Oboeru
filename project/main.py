@@ -1,7 +1,8 @@
 import random
 import time
 from os import system, name
-from vocabulary import *
+from pykakasi import kakasi
+from vocabulary import Vocabulary
 
 def clearCli():
     # for windows
