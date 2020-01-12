@@ -204,6 +204,7 @@ class Quiz:
         self.numIncorrect = 0
         self.numCorrect = 0
         self.report = '...'
+        self.mistakes = [] 
     
     def startall(self, qnLanguage):
         self.start(qnLanguage, self.vocabulary.getVocabularySize())
@@ -239,7 +240,11 @@ class Quiz:
         clearCli()        
         self.printProgress()
         print('Quiz Ended!')
-        input("Press Enter to continue...")
+        print("Press Enter to continue...")
+        print('\n====Mistakes=====')
+        for mistake in self.mistakes:
+            print(mistake)
+        input("=================")
     
     def start_open_ended(self, startLesson=None, endLesson=None):
         indices = self.buildIndicesFromLessons(startLesson, endLesson)
@@ -266,7 +271,11 @@ class Quiz:
         clearCli()        
         self.printProgress()
         print('Quiz Ended!')
-        input("Press Enter to continue...")
+        print("Press Enter to continue...")
+        print('\n====Mistakes=====')
+        for mistake in self.mistakes:
+            print("\n", mistake, "\n")
+        input("=================")
 
     def buildIndicesFromLessons(self, startLesson, endLesson):
         indices = []
@@ -291,6 +300,8 @@ class Quiz:
                 'You typed ' + open_ended_qn.inputAnswer + ' >>converted>> ' + open_ended_qn.inputAnswer_all_hiragana + '\n' +
                 'Answer is ' + open_ended_qn.correctAnswer + ' >>converted>> ' + open_ended_qn.correctAnswer_all_hiragana)
         self.report = report
+        if not isCorrect: 
+            self.mistakes.append(report)
 
     def updateProgress(self, isCorrect, mcqqn):
         if isCorrect:
@@ -302,6 +313,8 @@ class Quiz:
         else:
             report = 'Wrong! ' + mcqqn.questionWord + ' means ' + mcqqn.correctAnswer
         self.report = report
+        if not isCorrect:
+            self.mistakes.append(report)
 
     def printProgress(self):
         numLeft = self.numTotalQuestions - self.numCorrect - self.numIncorrect
