@@ -425,7 +425,7 @@ class Vocabulary:
     def printWholeVocabulary(self):
         for word in self.wordList:
             print(word.__str__())
-        x = input()
+        input()
 
     def hasLesson(self, lessonNumber):
         return lessonNumber in self.lessonList
@@ -446,16 +446,22 @@ class Vocabulary:
         return similarWords
 
 class Word:
-    def __init__(self, japanese, japanese_all_hiragana, english, lesson, partOfSpeech):
+    def __init__(self, japanese, japanese_all_hiragana, english, lesson, partOfSpeech, isTransitive):
         # print(japanese, english, lesson, partOfSpeech)
         self.japanese = japanese
         self.japanese_all_hiragana = japanese_all_hiragana
         self.english = english
         self.lesson = lesson
         self.partOfSpeech = partOfSpeech
+        self.isTransitive = isTransitive
+
+        if self.isTransitive is not None and PartOfSpeech.VERB not in self.partOfSpeech:
+            raise Exception(self.japanese, self.partOfSpeech, self.isTransitive, " is not a verb but is either transitive/intransitive.")
+        # if PartOfSpeech.VERB in self.partOfSpeech and self.isTransitive is None:
+        #     print('Info: ' + self.japanese + ' [' + str(self.lesson) + '] has no intransitive of instrasitive defined')
 
     def __str__(self):
-        return self.japanese + ' ' + self.japanese_all_hiragana + ' ' + self.english + ' ' + str(self.lesson) + ' ' + ''.join(str(self.partOfSpeech))
+        return self.japanese + ' ' + self.japanese_all_hiragana + ' ' + self.english + ' ' + str(self.lesson) + ' ' + ''.join(str(self.partOfSpeech)) + str(self.isTransitive)
 
 # [nan 'n' 'exp' 'v' 'adverb' 'な-adj' 'い-adj' 'な-adj, n' 'adverb, n', 'counter']
 class PartOfSpeech(Enum):
@@ -486,8 +492,17 @@ class VocabularyBuilder:
             if self.checkValidData(row):
                 lessonNum = row['lesson']
                 conv = kksi.getConverter()
-                japanese_all_hiragana = conv.do(row['japanese'])
-                word = Word(row['japanese'], japanese_all_hiragana, row['english'], row['lesson'], splitPOS)
+                japanese_all_hiragana = conv.do(row['japanese'])                    
+                if row['intransitive'] == 't':
+                    isTransitive = True
+                    english_meaning = row['english'] + ' (transitive)'
+                elif row['intransitive'] == 'i':
+                    isTransitive = False
+                    english_meaning = row['english'] + ' (intransitive)'
+                else:
+                    isTransitive = None
+                    english_meaning = row['english']
+                word = Word(row['japanese'], japanese_all_hiragana, english_meaning, row['lesson'], splitPOS, isTransitive=isTransitive)
                 wordList.append(word)
                 
                 indexOfAddedWord = len(wordList) - 1
