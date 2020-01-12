@@ -42,7 +42,8 @@ class Vocabulary:
         return similarWords
 
 class Word:
-    def __init__(self, japanese, japanese_all_hiragana, english, lesson, partOfSpeech, isTransitive):
+    def __init__(self, japanese, japanese_all_hiragana, english, lesson, partOfSpeech, 
+                    isTransitive, preJapanese, preJapaneseParticle, postJapanese, preEnglish, postEnglish):
         # print(japanese, english, lesson, partOfSpeech)
         self.japanese = japanese
         self.japanese_all_hiragana = japanese_all_hiragana
@@ -50,6 +51,11 @@ class Word:
         self.lesson = lesson
         self.partOfSpeech = partOfSpeech
         self.isTransitive = isTransitive
+        self.preJapanese = preJapanese
+        self.preJapaneseParticle = preJapaneseParticle
+        self.postJapanese = postJapanese
+        self.preEnglish = preEnglish
+        self.postEnglish = postEnglish
 
         if self.isTransitive is not None and PartOfSpeech.VERB not in self.partOfSpeech:
             raise Exception(self.japanese, self.partOfSpeech, self.isTransitive, " is not a verb but is either transitive/intransitive.")
@@ -57,7 +63,10 @@ class Word:
         #     print('Info: ' + self.japanese + ' [' + str(self.lesson) + '] has no intransitive of instrasitive defined')
 
     def __str__(self):
-        return self.japanese + ' ' + self.japanese_all_hiragana + ' ' + self.english + ' ' + str(self.lesson) + ' ' + ''.join(str(self.partOfSpeech)) + str(self.isTransitive)
+        return (self.preJapanese +' '+ self.preJapaneseParticle +' '+ self.japanese + ' ' + self.postJapanese + ' ' + 
+            self.japanese_all_hiragana + ' ' + 
+            self.preEnglish + ' ' + self.english + ' ' + self.postEnglish + ' ' +
+            str(self.lesson) + ' ' + ''.join(str(self.partOfSpeech)) + str(self.isTransitive))
 
 # [nan 'n' 'exp' 'v' 'adverb' 'な-adj' 'い-adj' 'な-adj, n' 'adverb, n', 'counter']
 class PartOfSpeech(Enum):
@@ -98,7 +107,10 @@ class VocabularyBuilder:
                 else:
                     isTransitive = None
                     english_meaning = row['english']
-                word = Word(row['japanese'], japanese_all_hiragana, english_meaning, row['lesson'], splitPOS, isTransitive=isTransitive)
+                
+                word = Word(row['japanese'], japanese_all_hiragana, english_meaning, row['lesson'], splitPOS, isTransitive, 
+                    self.convertNanToEmptyString(row['preJapanese']), self.convertNanToEmptyString(row['preJapaneseParticle']), 
+                    self.convertNanToEmptyString(row['postJapanese']), self.convertNanToEmptyString(row['preEnglish']), self.convertNanToEmptyString(row['postEnglish']))
                 wordList.append(word)
                 
                 indexOfAddedWord = len(wordList) - 1
@@ -128,6 +140,13 @@ class VocabularyBuilder:
             if pd.isnull(rowData[colNames]):
                 return False
         return True
+
+    def convertNanToEmptyString(self, input):
+        if pd.isnull(input):
+            return ''
+        else:
+            return input
+        
 
     # [nan 'n' 'exp' 'v' 'adverb' 'な-adj' 'い-adj' 'な-adj, n' 'adverb, n', 'counter']
     def parsePartOfSpeech(self, unparsedData):

@@ -339,10 +339,26 @@ class OpenEndedQuestion:
         
     def getQuestionWordAndCorrectAnswer(self, index):
         word = self.vocabulary.getWord(index)
+        self.preQuestionWord = word.preEnglish
+        self.postQuestionWord = word.postEnglish
+        self.preAnswerWord = word.preJapanese + word.preJapaneseParticle
+        self.postAnswerWord = word.postJapanese
         self.questionWord, self.correctAnswer, self.correctAnswer_all_hiragana = word.english, word.japanese, word.japanese_all_hiragana
 
     def printQuestion(self):
-        print(self.questionWord)
+        printString = self.questionWord
+        if self.preQuestionWord != '':
+            printString = '[' + self.preQuestionWord + '] ' + printString
+        if self.postQuestionWord != '':
+            printString = printString + ' [' + self.postQuestionWord + ']'
+        print(printString)
+
+        printStringAnswer = '(     ?     )'
+        if self.preAnswerWord != '': 
+            printStringAnswer = '[' + self.preAnswerWord + ']' + printStringAnswer
+        if self.postAnswerWord != '':
+            printStringAnswer = printStringAnswer + '[' + self.postAnswerWord + ']'
+        print(printStringAnswer)
         #print('>>>', self.correctAnswer, '>>>', self.correctAnswer_all_hiragana)
 
     def answerQuestion(self, input):
