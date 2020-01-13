@@ -42,25 +42,91 @@ class Vocabulary:
         return similarWords
 
 class Word:
-    def __init__(self, japanese, japanese_all_hiragana, english, lesson, partOfSpeech, 
-                    isTransitive, preJapanese, preJapaneseParticle, postJapanese, preEnglish, postEnglish):
-        # print(japanese, english, lesson, partOfSpeech)
-        self.japanese = japanese
-        self.japanese_all_hiragana = japanese_all_hiragana
-        self.english = english
-        self.lesson = lesson
-        self.partOfSpeech = partOfSpeech
+    def __init__(self,  lesson, partOfSpeech, isTransitive, 
+                    preJapanese, preJapaneseParticle, japanese_all_hiragana, japanese, postJapanese,
+                    preEnglish, english, postEnglish):
+        self.lesson = lesson # int
+        self.partOfSpeech = partOfSpeech # list of PartOfSpeech Enum
         self.isTransitive = isTransitive
         self.preJapanese = preJapanese
         self.preJapaneseParticle = preJapaneseParticle
+        self.japanese = japanese
+        self.japanese_all_hiragana = japanese_all_hiragana
         self.postJapanese = postJapanese
         self.preEnglish = preEnglish
+        self.english = english
         self.postEnglish = postEnglish
 
         if self.isTransitive is not None and PartOfSpeech.VERB not in self.partOfSpeech:
             raise Exception(self.japanese, self.partOfSpeech, self.isTransitive, " is not a verb but is either transitive/intransitive.")
-        # if PartOfSpeech.VERB in self.partOfSpeech and self.isTransitive is None:
-        #     print('Info: ' + self.japanese + ' [' + str(self.lesson) + '] has no intransitive of instrasitive defined')
+
+    def getAsFullString(self, language):
+        if language == 'jp':
+            preString = self.preJapanese + self.preJapaneseParticle
+            postString = self.postJapanese
+        if language == 'en':
+            preString = self.preEnglish
+            postString = self.postEnglish
+        
+        if preString != '':
+            preString = '[' + preString + ']'
+        if postString != '':
+            postString = '[' + postString + ']'
+        
+        if language == 'jp':
+            fullString = preString + self.japanese + postString
+        if language == 'en':
+            if preString != '':
+                fullString = preString + ' '
+            else:
+                fullString = ''
+            fullString = fullString + self.english
+            if postString != '': 
+                fullString = fullString + ' ' + postString
+
+            if self.isTransitive == True:
+                fullString = fullString + ' ' + '(transitive)'
+            elif self.isTransitive == False:
+                fullString = fullString + ' ' + '(intransitive)'
+
+        return fullString
+
+    def getAsStringWithBlank(self, language):
+        if language == 'jp':
+            preString = self.preJapanese + self.preJapaneseParticle
+            postString = self.postJapanese
+        if language == 'en':
+            preString = self.preEnglish
+            postString = self.postEnglish
+        
+        if preString != '':
+            preString = '[' + preString + ']'
+        if postString != '':
+            postString = '[' + postString + ']'
+        
+        if language == 'jp':
+            stringWithBlank = preString + '(     ?     )' + postString
+        if language == 'en':
+            if preString != '':
+                stringWithBlank = preString + ' '
+            else:
+                stringWithBlank = ''
+            stringWithBlank = stringWithBlank + '(     ?     )'
+            if postString != '': 
+                stringWithBlank = stringWithBlank + ' ' + postString
+
+        return stringWithBlank
+    
+    def getAsAnswerOnly(self, answerLanguage):
+        if answerLanguage == 'jp':
+            return self.japanese
+        elif answerLanguage == 'en':
+            answer = self.english
+            if self.isTransitive == True:
+                answer = answer + ' ' + '(transitive)'
+            elif self.isTransitive == False:
+                answer = answer + ' ' + '(intransitive)'
+            return answer
 
     def __str__(self):
         return (self.preJapanese +' '+ self.preJapaneseParticle +' '+ self.japanese + ' ' + self.postJapanese + ' ' + 
@@ -93,34 +159,39 @@ class VocabularyBuilder:
         kksi = kakasi()
         kksi.setMode("J","H")
         for index, row in df.iterrows():
-            splitPOS = self.parsePartOfSpeech(row['pos'])
             if self.checkValidData(row):
-                lessonNum = row['lesson']
-                conv = kksi.getConverter()
-                japanese_all_hiragana = conv.do(row['japanese'])                    
+                lesson_num = row['lesson']
+                pos_list = self.parsePartOfSpeech(row['pos'])
+                
                 if row['intransitive'] == 't':
                     isTransitive = True
-                    english_meaning = row['english'] + ' (transitive)'
                 elif row['intransitive'] == 'i':
                     isTransitive = False
-                    english_meaning = row['english'] + ' (intransitive)'
                 else:
-                    isTransitive = None
-                    english_meaning = row['english']
-                
-                word = Word(row['japanese'], japanese_all_hiragana, english_meaning, row['lesson'], splitPOS, isTransitive, 
-                    self.convertNanToEmptyString(row['preJapanese']), self.convertNanToEmptyString(row['preJapaneseParticle']), 
-                    self.convertNanToEmptyString(row['postJapanese']), self.convertNanToEmptyString(row['preEnglish']), self.convertNanToEmptyString(row['postEnglish']))
+                    isTransitive = None                
+
+                pre_japanese = self.convertNanToEmptyString(row['preJapanese'])
+                pre_japanese_particle = self.convertNanToEmptyString(row['preJapaneseParticle'])
+                japanese_all_hiragana = row['japaneseAllHiragana']               
+                japanese = row['japanese']
+                post_japanese = self.convertNanToEmptyString(row['postJapanese'])
+                pre_english = self.convertNanToEmptyString(row['preEnglish'])
+                english = row['english']
+                post_english = self.convertNanToEmptyString(row['postEnglish'])
+
+                word = Word(lesson_num, pos_list, isTransitive, 
+                                pre_japanese, pre_japanese_particle, japanese_all_hiragana, japanese, post_japanese,
+                                pre_english, english, post_english)
                 wordList.append(word)
                 
                 indexOfAddedWord = len(wordList) - 1
-                if lessonNum not in lessonList:
+                if lesson_num not in lessonList:
                     indices = []
                 else:
-                    indices = lessonList[lessonNum] 
+                    indices = lessonList[lesson_num] 
                 indices.append(indexOfAddedWord)
-                lessonList[lessonNum] = indices
-                for pos in splitPOS:
+                lessonList[lesson_num] = indices
+                for pos in pos_list:
                     if pos not in partOfSpeechList:
                         indices = []
                     else:
@@ -134,10 +205,11 @@ class VocabularyBuilder:
         print('Vocabulary built')
         return wordList, partOfSpeechList, lessonList
 
+    # in vocab.xlsx, an entry (row) must have the following columns
     def checkValidData(self, rowData):
-        listColNames = ['lesson','japanese', 'english']
-        for colNames in listColNames:
-            if pd.isnull(rowData[colNames]):
+        requiredColNames = ['lesson', 'japanese', 'japaneseAllHiragana', 'english']
+        for colName in requiredColNames:
+            if pd.isnull(rowData[colName]):
                 return False
         return True
 
@@ -146,9 +218,7 @@ class VocabularyBuilder:
             return ''
         else:
             return input
-        
-
-    # [nan 'n' 'exp' 'v' 'adverb' 'な-adj' 'い-adj' 'な-adj, n' 'adverb, n', 'counter']
+    
     def parsePartOfSpeech(self, unparsedData):
         if pd.isnull(unparsedData):
             splitPOS = ['undefined']

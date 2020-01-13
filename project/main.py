@@ -274,14 +274,19 @@ class Quiz:
         print("Press Enter to continue...")
         print('\n====Mistakes=====')
         for mistake in self.mistakes:
-            print("\n", mistake, "\n")
+            print(mistake, "\n\n")
         input("=================")
 
     def buildIndicesFromLessons(self, startLesson, endLesson):
         indices = []
         for lessonNum in range(int(startLesson), int(endLesson) + 1):
-            indicesFromLesson = self.vocabulary.lessonList[lessonNum]
-            indices = indices + indicesFromLesson
+            try:
+                indicesFromLesson = self.vocabulary.lessonList[lessonNum]
+                indices = indices + indicesFromLesson
+            except KeyError:
+                string = 'No vocabulary from Lesson ' + str(lessonNum) + '. Enter to acknowledge'
+                input(string)
+                pass
         indices = random.sample(indices, len(indices))
         return indices
 
@@ -292,13 +297,10 @@ class Quiz:
             self.numIncorrect += 1
         
         if isCorrect:
-            report = ('Correct! ' + open_ended_qn.questionWord + ' means ' + open_ended_qn.correctAnswer + '\n' +
-                'You typed ' + open_ended_qn.inputAnswer + ' >>converted>> ' + open_ended_qn.inputAnswer_all_hiragana + '\n' +
-                'Answer is ' + open_ended_qn.correctAnswer + ' >>converted>> ' + open_ended_qn.correctAnswer_all_hiragana)
+            report = ('Correct! ' + open_ended_qn.questionString + ' means ' + open_ended_qn.correctAnswer)
         else:
-            report = ('Wrong! ' + open_ended_qn.questionWord + ' means ' + open_ended_qn.correctAnswer + '\n' +
-                'You typed ' + open_ended_qn.inputAnswer + ' >>converted>> ' + open_ended_qn.inputAnswer_all_hiragana + '\n' +
-                'Answer is ' + open_ended_qn.correctAnswer + ' >>converted>> ' + open_ended_qn.correctAnswer_all_hiragana)
+            report = ('Wrong! "' + open_ended_qn.questionString + '" means "' + open_ended_qn.correctAnswer + '/' + open_ended_qn.correctAnswer_all_hiragana +
+                '"   (You typed ' + open_ended_qn.inputAnswer + '/' + open_ended_qn.inputAnswer_all_hiragana +')')
         self.report = report
         if not isCorrect: 
             self.mistakes.append(report)
@@ -309,9 +311,9 @@ class Quiz:
         else:
             self.numIncorrect += 1
         if isCorrect:
-            report = 'Correct! ' + mcqqn.questionWord + ' means ' + mcqqn.correctAnswer
+            report = 'Correct! "' + mcqqn.questionString + '" means "' + mcqqn.correctAnswerString + "'"
         else:
-            report = 'Wrong! ' + mcqqn.questionWord + ' means ' + mcqqn.correctAnswer
+            report = 'Wrong! "' + mcqqn.questionString + '" means "' + mcqqn.correctAnswerString + "'"
         self.report = report
         if not isCorrect:
             self.mistakes.append(report)
@@ -328,7 +330,8 @@ class Quiz:
 # Open ended questions are aways english word, give japanese answer.
 class OpenEndedQuestion:
     def __init__(self, index, vocabulary):
-        self.questionWord = None
+        self.questionString = None
+        self.stringWithBlank = None
         self.correctAnswer = None
         self.correctAnswer_all_hiragana = None
         self.inputAnswer = None
@@ -339,27 +342,15 @@ class OpenEndedQuestion:
         
     def getQuestionWordAndCorrectAnswer(self, index):
         word = self.vocabulary.getWord(index)
-        self.preQuestionWord = word.preEnglish
-        self.postQuestionWord = word.postEnglish
-        self.preAnswerWord = word.preJapanese + word.preJapaneseParticle
-        self.postAnswerWord = word.postJapanese
-        self.questionWord, self.correctAnswer, self.correctAnswer_all_hiragana = word.english, word.japanese, word.japanese_all_hiragana
+        self.questionString = word.getAsFullString('en')
+        self.stringWithBlank = word.getAsStringWithBlank('jp')
+        self.correctAnswer = word.japanese
+        self.correctAnswer_all_hiragana = word.japanese_all_hiragana 
+
 
     def printQuestion(self):
-        printString = self.questionWord
-        if self.preQuestionWord != '':
-            printString = '[' + self.preQuestionWord + '] ' + printString
-        if self.postQuestionWord != '':
-            printString = printString + ' [' + self.postQuestionWord + ']'
-        print(printString)
-
-        printStringAnswer = '(     ?     )'
-        if self.preAnswerWord != '': 
-            printStringAnswer = '[' + self.preAnswerWord + ']' + printStringAnswer
-        if self.postAnswerWord != '':
-            printStringAnswer = printStringAnswer + '[' + self.postAnswerWord + ']'
-        print(printStringAnswer)
-        #print('>>>', self.correctAnswer, '>>>', self.correctAnswer_all_hiragana)
+        print(self.questionString)
+        print(self.stringWithBlank)
 
     def answerQuestion(self, input):
         kksi = kakasi()
@@ -368,14 +359,19 @@ class OpenEndedQuestion:
         convertedInput_all_hiragana = conv.do(input)
         self.inputAnswer = input
         self.inputAnswer_all_hiragana = convertedInput_all_hiragana
-        isCorrect = convertedInput_all_hiragana == self.correctAnswer_all_hiragana
+        
+        isKanjiAnswerCorrect = self.inputAnswer == self.correctAnswer
+        isHiraganaAnswerCorrect = self.inputAnswer_all_hiragana == self.correctAnswer_all_hiragana
+        isCorrect = isKanjiAnswerCorrect or isHiraganaAnswerCorrect
         return isCorrect   
 
 
 class McqQuestion:
     def __init__(self, index, fromLanguage, vocabulary):
-        self.questionWord = None
+        self.questionString = None
+        self.answerStringBlanked = None
         self.correctAnswer = None
+        self.correctAnswerString = None
         self.otherAnswers = None
         self.numOptions = None
         self.correctOption = None
@@ -391,19 +387,28 @@ class McqQuestion:
 
     def getQuestionWordAndCorrectAnswer(self, index, fromLanguage):
         word = self.vocabulary.getWord(index)
-        if fromLanguage == 'jp':
-            self.questionWord, self.correctAnswer = word.japanese, word.english
-        elif fromLanguage == 'en':
-            self.questionWord, self.correctAnswer = word.english, word.japanese
+        questionLanguage = fromLanguage
+        if questionLanguage == 'en':
+            answerLanguage = 'jp'
+        elif questionLanguage == 'jp':
+            answerLanguage = 'en' 
+
+        questionString = word.getAsFullString(questionLanguage)
+        answerStringBlanked = word.getAsStringWithBlank(answerLanguage)
+        answer = word.getAsAnswerOnly(answerLanguage)
+        correctAnswerString = word.getAsFullString(answerLanguage)
+        self.questionString, self.answerStringBlanked, self.correctAnswer, self.correctAnswerString = questionString, answerStringBlanked, answer, correctAnswerString
 
     def getOtherAnswers(self, index, fromLanguage):
         otherWords = self.vocabulary.get3WordsSimilarPos(index)
         otherAnswersList = []
+        questionLanguage = fromLanguage
+        if questionLanguage == 'en':
+            answerLanguage = 'jp'
+        elif questionLanguage == 'jp':
+            answerLanguage = 'en' 
         for otherWord in otherWords:
-            if fromLanguage == 'jp':
-                otherAnswer = otherWord.english
-            elif fromLanguage == 'en':
-                otherAnswer = otherWord.japanese
+            otherAnswer = otherWord.getAsAnswerOnly(answerLanguage)
             otherAnswersList.append(otherAnswer)
         self.otherAnswers = otherAnswersList
 
@@ -419,7 +424,8 @@ class McqQuestion:
         self.options = options
 
     def printQuestion(self):
-        print(self.questionWord)
+        print(self.questionString)
+        print(self.answerStringBlanked)
         if self.numOptions >= 1:
             print("1)", self.options[0])
         if self.numOptions >= 2:
