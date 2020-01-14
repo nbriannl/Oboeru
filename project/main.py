@@ -369,6 +369,7 @@ class OpenEndedQuestion:
 class McqQuestion:
     def __init__(self, index, fromLanguage, vocabulary):
         self.questionString = None
+        self.questionStringAllHiragana = None
         self.answerStringBlanked = None
         self.correctAnswer = None
         self.correctAnswerString = None
@@ -391,13 +392,15 @@ class McqQuestion:
         if questionLanguage == 'en':
             answerLanguage = 'jp'
         elif questionLanguage == 'jp':
-            answerLanguage = 'en' 
+            answerLanguage = 'en'
+            questionStringAllHiragana = word.getAsFullString(questionLanguage, allHiragana=True) 
 
         questionString = word.getAsFullString(questionLanguage)
         answerStringBlanked = word.getAsStringWithBlank(answerLanguage)
         answer = word.getAsAnswerOnly(answerLanguage)
         correctAnswerString = word.getAsFullString(answerLanguage)
         self.questionString, self.answerStringBlanked, self.correctAnswer, self.correctAnswerString = questionString, answerStringBlanked, answer, correctAnswerString
+        self.questionStringAllHiragana = questionStringAllHiragana
 
     def getOtherAnswers(self, index, fromLanguage):
         otherWords = self.vocabulary.get3WordsSimilarPos(index)
@@ -425,6 +428,8 @@ class McqQuestion:
 
     def printQuestion(self):
         print(self.questionString)
+        if self.questionStringAllHiragana is not None: 
+            print(self.questionStringAllHiragana)
         print(self.answerStringBlanked)
         if self.numOptions >= 1:
             print("1)", self.options[0])

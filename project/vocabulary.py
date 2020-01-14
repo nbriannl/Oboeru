@@ -60,7 +60,7 @@ class Word:
         if self.isTransitive is not None and PartOfSpeech.VERB not in self.partOfSpeech:
             raise Exception(self.japanese, self.partOfSpeech, self.isTransitive, " is not a verb but is either transitive/intransitive.")
 
-    def getAsFullString(self, language):
+    def getAsFullString(self, language, allHiragana=False):
         if language == 'jp':
             preString = self.preJapanese + self.preJapaneseParticle
             postString = self.postJapanese
@@ -74,7 +74,10 @@ class Word:
             postString = '[' + postString + ']'
         
         if language == 'jp':
-            fullString = preString + self.japanese + postString
+            if allHiragana:
+                fullString = preString + self.japanese_all_hiragana + postString
+            else:
+                fullString = preString + self.japanese + postString
         if language == 'en':
             if preString != '':
                 fullString = preString + ' '
