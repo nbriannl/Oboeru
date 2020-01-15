@@ -85,5 +85,4 @@ _I get asked and probably will get asked this a lot._
 
 - Oboeru fills up the other MCQ options with words of similar parts of speech. 
 - Creating over 1800 Anki cards (or any quiz question on [_insert app name here_]) is tedious. 
-- Oboer
 - I decided to do this as a fun project before my last semester starts.

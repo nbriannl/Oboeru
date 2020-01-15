@@ -22,7 +22,7 @@ class CLI:
             "'s' to start an MCQ quiz with custom size\n"
             "'sl' to start an MCQ quiz according to Lessons based on みんなの日本語\n"
             "'j1' or 'j2' or 'j3' to start an MCQ quiz for vocabulary in the respective Japanese modules\n"
-            "'o' to start an Open-ended quiz. 日本語➝English. You can pick which lessons\n"
+            "'o' to start an Open-ended quiz. 日本語 to English. You can pick which lessons\n"
             "Type 'q' to quit'")
     invalid_command = 'Invalid command'
     invalid_answer = 'Invalid answer'
@@ -394,6 +394,7 @@ class McqQuestion:
         questionLanguage = fromLanguage
         if questionLanguage == 'en':
             answerLanguage = 'jp'
+            questionStringAllHiragana = None
         elif questionLanguage == 'jp':
             answerLanguage = 'en'
             questionStringAllHiragana = word.getAsFullString(questionLanguage, allHiragana=True) 
