@@ -11,15 +11,15 @@ Oboeru (The romanization of the Japanese 覚える, which means ‘to remember�
 
 **MCQ (Japanese to English)**
 
-![MCQ (jp to en)](project/mcqen.PNG)
+<img src="project/mcqen.PNG" height="250" />
 
 **MCQ (English to Japanese)**
 
-![MCQ (en to jp)](project/mcqjp.PNG)
+<img src="project/mcqjp.PNG" height="250" />
 
 **Open Ended Quiz (Japanese to English)**
 
-![MCQ (en to jp)](project/openended.PNG)
+<img src="project/openended.PNG" height="250" />
 
 ### Possible Future Features
 
