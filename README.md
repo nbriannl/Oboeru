@@ -3,7 +3,28 @@
 
 Oboeru (The romanization of the Japanese 覚える, which means ‘to remember’) is a program to help Japanese language learning, particularly NUS Japanese Language students using the みんなの日本語 textbook, to practice their vocabulary, especially after a hiatus of language studies.
 
+## Features
 
+- Vocabulary according to みんなの日本語
+- Similar part of speech will be suggested as other options in MCQ.
+- Vocabulary with clauses are handled, especially useful for open-ended quizes.
+
+**MCQ (Japanese to English)**
+
+![MCQ (jp to en)](.\project\mcqen.PNG)
+
+**MCQ (English to Japanese)**
+
+![MCQ (en to jp)](.\project\mcqjp.PNG)
+
+**Open Ended Quiz (Japanese to English)**
+
+![MCQ (en to jp)](.\project\openended.PNG)
+
+### Possible Future Features
+
+- Open-ended quiz asking for different forms of words in terms of positive, negative, past, present, imperative, volitional.
+- Testing particle usage of verbs.  
 
 ## How to Install
 This project was developed with `Python 3.7.4`. Please ensure a compatible version is installed in your computer.
@@ -85,4 +106,5 @@ _I get asked and probably will get asked this a lot._
 
 - Oboeru fills up the other MCQ options with words of similar parts of speech. 
 - Creating over 1800 Anki cards (or any quiz question on [_insert app name here_]) is tedious. 
+- There is much more flexibility allowing more advanced quiz features to be potentially made.
 - I decided to do this as a fun project before my last semester starts.
