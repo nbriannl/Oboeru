@@ -6,6 +6,7 @@ Oboeru (The romanization of the Japanese 覚える, which means ‘to remember�
 ## Features
 
 - Vocabulary according to みんなの日本語
+-- Be quizzed on a specific or a range of lessons.
 - Similar part of speech will be suggested as other options in MCQ.
 - Vocabulary with clauses are handled, especially useful for open-ended quizes.
 
