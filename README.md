@@ -3,18 +3,19 @@
 
 Oboeru (The romanization of the Japanese 覚える, which means ‘to remember’) is a program to help Japanese language learning, particularly NUS Japanese Language students using the みんなの日本語 textbook, to practice their vocabulary, especially after a hiatus of language studies.
 
-**Why not use Anki or [insert App name here]?**
 
-_I get asked and probably will get asked this a lot._ 
-
-Oboeru fills up the other MCQ options with words of similar parts of speech. Plus generation of over 1200 Anki cards would be to tedious. In fact, for most existing options, conversion of my excel sheet to their cards would be too difficult. Plus I decided to do this as a fun project before my last semester starts.
 
 ## How to Install
 This project was developed with `Python 3.7.4`. Please ensure a compatible version is installed in your computer.
 
 This project is developed on Windows. I am not sure whether this is compatible with other operating systems.
 
-I have yet to make a `requirements.txt`, but this project uses `pandas` to load the vocabulary excel file into the program. `pip install panda` should do fine.
+I have yet to make a `requirements.txt`, but this project uses 
+
+- `pandas` to load the vocabulary excel file into the program. 
+- `kakasi` to convert user input into hiragana in order to help check open-ended answers.
+
+Therefore, `pip install panda`, `pip install kakasi` should do fine.
 
 Ensure that the font used in the console can print asian fonts, such as MS Gothic, MS Mincho or NSimSun. You can change this via **Properties > Font > Font**
 
@@ -45,15 +46,44 @@ The excel file was originally made by me for Japanese 3 revision, hence not all 
 
 - **hasKatakanaOrKanji:** J if the **Japanese** field contains Kanji, K if it contains Katakana
 
+- **preJapanese:** Any clause or symbol (eg: ～, ー) that appears before the Japanese word
+
+- **preJapaneseParticle:** The particle of the clause that appears before the Japanese word
+
 - ⊛ **japanese:** The Japanese word
 
+- **postJapanese:** Any clause or symbol that appears after the Japanese word. Typically the '。' for expression will be put here. 
+
+- **preEnglish:** Any clause that appears before the English word
+
 - ⊛ **english:** The English word
+
+- **postEnglish:** Any clause that appears after the English word
 
 - **isSuruVerb:** Fill with either [を]する or をする or none depending on whether the word (which is likely a noun) can be used with する and in what usage.
 
 - **suruMeaning:** The meaning of the word when added with する 
 
+**Examples for language related columns:**
+
+| Original | preJapanese |preJapaneseParticle | Japanese | postJapanese | preEnglish | english | postEnglish |
+| --------:|------------:| -----:|-----: |-----:|-----:|-----:|-----:|
+| うれます　[パンが～]  [bread] sell, be sold | パン | が | うれます | | bread | sell, be sold | 
+| かようます　[大学に] go to and from [university] | 大学　| に | かようます | | | go to and from | university |　 
+| [ああ、]よかった。  [Oh,] that's great!| ああ、| | よかった  |。 | Oh, | that's great! | |　 
+
 If you have added entries to the excel sheet. Feel free to share it under Issues or email me at neilbrian.nl@gmail.com 
 
 ## How to Contribute
 If you would like to work on this project. Do fork and PR any changes. It'll be amazing if you're a 日本語 学生 as well.
+
+## FAQ
+
+**Why not use Anki or [insert App name here]?**
+
+_I get asked and probably will get asked this a lot._ 
+
+- Oboeru fills up the other MCQ options with words of similar parts of speech. 
+- Creating over 1800 Anki cards (or any quiz question on [_insert app name here_]) is tedious. 
+- Oboer
+- I decided to do this as a fun project before my last semester starts.

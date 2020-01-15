@@ -18,13 +18,15 @@ class CLI:
     main_menu = ("Oboeru - 'It's time to 覚える!'\n"
             "========Main Menu========\n"
             "Options:\n"
-            "'sa' to start quiz for all vocabulary till Japanese 3\n"
-            "'s' to start a quiz with custom size\n"
-            "'sl' to start a quiz according to Lessons based on みんなの日本語\n"
-            "'j1' or 'j2' or 'j3' to test vocabulary for the respective Japanese modules\n"
+            "'sa' to start an MCQ quiz for all vocabulary (until L44)\n"
+            "'s' to start an MCQ quiz with custom size\n"
+            "'sl' to start an MCQ quiz according to Lessons based on みんなの日本語\n"
+            "'j1' or 'j2' or 'j3' to start an MCQ quiz for vocabulary in the respective Japanese modules\n"
+            "'o' to start an Open-ended quiz. 日本語➝English. You can pick which lessons\n"
             "Type 'q' to quit'")
     invalid_command = 'Invalid command'
     invalid_answer = 'Invalid answer'
+    how_to_quit_quiz = "Enter 'q' to quit the quiz at any time."
 
 
 class Main:
@@ -71,6 +73,10 @@ class Main:
                     language = self.selectLanguage()
                     print('Starting quiz for Japanese 3 vocabulary!\n\n')
                     quiz.start(language, startLesson=21, endLesson=32)
+                elif command == 'o':
+                    print('Starting open ended quiz')
+                    startLesson, endLesson = self.selectLessons()
+                    quiz.start_open_ended(startLesson=startLesson, endLesson=endLesson)
                 elif command == 'q':
                     print('Quiting program')
                     break
@@ -80,10 +86,6 @@ class Main:
                 elif command == 't':
                     print('Test')
                     self.testFunction()
-                elif command == 'o':
-                    print('Starting open ended quiz')
-                    startLesson, endLesson = self.selectLessons()
-                    quiz.start_open_ended(startLesson=startLesson, endLesson=endLesson)
 
     def testFunction(self):
         kksi = kakasi()
@@ -133,14 +135,14 @@ class Main:
 
     def selectLessons(self):
         clearCli()
-        print('(s)ingle or (r)ange of lessons? (s/r)')
+        print('Do you want to do a (s)ingle or a (r)ange of lessons? (s/r)')
         while True:
             value = input()
             isValidInput = value == 's' or value == 'r'
             if isValidInput:
                 break
             clearCli()
-            print('(s)ingle or (r)ange of lessons? (s/r)')
+            print('Do you want to do a (s)ingle or a (r)ange of lessons? (s/r)')
             print(CLI.invalid_command)
         if value == 's':
             startLesson, endLesson = self.selectSingleLesson()
@@ -325,6 +327,7 @@ class Quiz:
         print('Wrong:', self.numIncorrect)
         print('Total', self.numTotalQuestions)
         print('Previous word:', self.report)
+        print(CLI.how_to_quit_quiz)
         print('\n=====================\n')
 
 # Open ended questions are aways english word, give japanese answer.
