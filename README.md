@@ -9,13 +9,9 @@ Oboeru (The romanization of the Japanese 覚える, which means ‘to remember�
 - Similar part of speech will be suggested as other options in MCQ.
 - Vocabulary with clauses are handled, especially useful for open-ended quizes.
 
-**MCQ (Japanese to English)**
+**MCQ (Japanese to English and English to Japanese)**
 
-<img src="project/mcqen.PNG" height="250" />
-
-**MCQ (English to Japanese)**
-
-<img src="project/mcqjp.PNG" height="250" />
+<img src="project/mcqen.PNG" height="250" /> <img src="project/mcqjp.PNG" height="250" />
 
 **Open Ended Quiz (Japanese to English)**
 
