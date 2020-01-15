@@ -19,11 +19,11 @@ Oboeru (The romanization of the Japanese 覚える, which means ‘to remember�
 
 **Open Ended Quiz (Japanese to English)**
 
-<img src="project/openended.PNG" height="250" />
+<img src="project/openended.PNG" height="180" />
 
 ### Possible Future Features
 
-- Open-ended quiz asking for different forms of words in terms of positive, negative, past, present, imperative, volitional.
+- Open-ended quiz asking for different forms of words (eg: positive, negative, past, present, imperative, volitional)
 - Testing particle usage of verbs.  
 
 ## How to Install
