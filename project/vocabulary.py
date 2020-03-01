@@ -58,7 +58,7 @@ class Word:
         self.english = english
         self.postEnglish = postEnglish
 
-        if self.isTransitive is not None and PartOfSpeech.VERB not in self.partOfSpeech:
+        if self.isTransitive is not None and 'v' not in self.partOfSpeech:
             raise Exception(self.japanese, self.partOfSpeech, self.isTransitive, " is not a verb but is either transitive/intransitive.")
 
     def getAsFullString(self, language, allHiragana=False):
@@ -206,10 +206,16 @@ class VocabularyBuilder:
                     indices.append(indexOfAddedWord)
                     partOfSpeechList[pos] = indices
         
-        for posType in PartOfSpeech:
-            for index in partOfSpeechList[posType]:
-                assert posType in wordList[index].partOfSpeech
+        # for posType in PartOfSpeech:
+        #     for index in partOfSpeechList[posType]:
+        #         assert posType in wordList[index].partOfSpeech
         print('Vocabulary built')
+        wordListJson = json.dumps([ob.__dict__ for ob in wordList], indent=4)
+        print(wordListJson)
+        with open('data.json', 'w') as outfile:
+            json.dump([ob.__dict__ for ob in wordList], outfile, indent=4)
+        print('Vocabulary made into json')
+        quit()
         return wordList, partOfSpeechList, lessonList
 
     # in vocab.xlsx, an entry (row) must have the following columns
@@ -235,21 +241,21 @@ class VocabularyBuilder:
         for posElem in splitPOS:
             posElem = posElem.strip()
             if posElem == 'n':
-                convertedPosElem = PartOfSpeech.NOUN
+                convertedPosElem = 'n'
             elif posElem == 'v':
-                convertedPosElem = PartOfSpeech.VERB
+                convertedPosElem = 'v'
             elif posElem == 'adverb':
-                convertedPosElem = PartOfSpeech.ADVERB
+                convertedPosElem = 'adv'
             elif posElem == 'な-adj':
-                convertedPosElem = PartOfSpeech.NA_ADJ
+                convertedPosElem = 'naadj'
             elif posElem == 'い-adj':
-                convertedPosElem = PartOfSpeech.I_ADJ
+                convertedPosElem = 'iadj'
             elif posElem == 'exp':
-                convertedPosElem = PartOfSpeech.EXP
+                convertedPosElem = 'exp'
             elif posElem == 'counter':
-                convertedPosElem = PartOfSpeech.COUNTER
+                convertedPosElem = 'ctr'
             elif posElem == 'undefined':
-                convertedPosElem = PartOfSpeech.OTHERS
+                convertedPosElem = 'others'
             else: 
                 raise Exception('invalid part of speech', posElem)
             cleanSplit.append(convertedPosElem)
