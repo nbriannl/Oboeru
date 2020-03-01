@@ -2,6 +2,7 @@ import pandas as pd
 from enum import Enum
 from pykakasi import kakasi
 import random
+import json
 
 class Vocabulary:
     def __init__(self):
@@ -75,7 +76,7 @@ class Word:
         
         if language == 'jp':
             if allHiragana:
-                fullString = preString + self.japanese_all_hiragana + postString
+                fullString = preString + self.japanese_all_hiragana + ' (' + self.japanese + ') '+ postString 
             else:
                 fullString = preString + self.japanese + postString
         if language == 'en':
@@ -120,9 +121,12 @@ class Word:
 
         return stringWithBlank
     
-    def getAsAnswerOnly(self, answerLanguage):
+    def getAsAnswerOnly(self, answerLanguage, allHiragana=False):
         if answerLanguage == 'jp':
-            return self.japanese
+            if allHiragana == True:
+                return self.japanese_all_hiragana
+            elif allHiragana == False:
+                return self.japanese
         elif answerLanguage == 'en':
             answer = self.english
             if self.isTransitive == True:
@@ -206,6 +210,10 @@ class VocabularyBuilder:
             for index in partOfSpeechList[posType]:
                 assert posType in wordList[index].partOfSpeech
         print('Vocabulary built')
+        wordListJson = json.dumps([ob.__dict__ for ob in wordList])
+        with open('data.txt', 'w') as outfile:
+            json.dump(wordListJson, outfile)
+        print('Vocabulary made into json')
         return wordList, partOfSpeechList, lessonList
 
     # in vocab.xlsx, an entry (row) must have the following columns

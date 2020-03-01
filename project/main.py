@@ -401,8 +401,8 @@ class McqQuestion:
 
         questionString = word.getAsFullString(questionLanguage)
         answerStringBlanked = word.getAsStringWithBlank(answerLanguage)
-        answer = word.getAsAnswerOnly(answerLanguage)
-        correctAnswerString = word.getAsFullString(answerLanguage)
+        answer = word.getAsAnswerOnly(answerLanguage) + ' (' + word.getAsAnswerOnly(answerLanguage, allHiragana=True) + ')'
+        correctAnswerString = word.getAsFullString(answerLanguage, allHiragana=True)
         self.questionString, self.answerStringBlanked, self.correctAnswer, self.correctAnswerString = questionString, answerStringBlanked, answer, correctAnswerString
         self.questionStringAllHiragana = questionStringAllHiragana
 
@@ -415,7 +415,7 @@ class McqQuestion:
         elif questionLanguage == 'jp':
             answerLanguage = 'en' 
         for otherWord in otherWords:
-            otherAnswer = otherWord.getAsAnswerOnly(answerLanguage)
+            otherAnswer = otherWord.getAsAnswerOnly(answerLanguage) + ' (' + otherWord.getAsAnswerOnly(answerLanguage, allHiragana=True) + ')'
             otherAnswersList.append(otherAnswer)
         self.otherAnswers = otherAnswersList
 
