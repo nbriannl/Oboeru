@@ -210,10 +210,6 @@ class VocabularyBuilder:
             for index in partOfSpeechList[posType]:
                 assert posType in wordList[index].partOfSpeech
         print('Vocabulary built')
-        wordListJson = json.dumps([ob.__dict__ for ob in wordList])
-        with open('data.txt', 'w') as outfile:
-            json.dump(wordListJson, outfile)
-        print('Vocabulary made into json')
         return wordList, partOfSpeechList, lessonList
 
     # in vocab.xlsx, an entry (row) must have the following columns
