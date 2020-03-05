@@ -58,7 +58,7 @@ class Word:
         self.english = english
         self.postEnglish = postEnglish
 
-        if self.isTransitive is not None and 'v' not in self.partOfSpeech:
+        if self.isTransitive is not None and 'verb' not in self.partOfSpeech:
             raise Exception(self.japanese, self.partOfSpeech, self.isTransitive, " is not a verb but is either transitive/intransitive.")
 
     def getAsFullString(self, language, allHiragana=False):
@@ -210,11 +210,18 @@ class VocabularyBuilder:
         #     for index in partOfSpeechList[posType]:
         #         assert posType in wordList[index].partOfSpeech
         print('Vocabulary built')
-        wordListJson = json.dumps([ob.__dict__ for ob in wordList], indent=4)
-        print(wordListJson)
-        with open('data.json', 'w') as outfile:
+        # wordListJson = json.dumps([ob.__dict__ for ob in wordList], indent=4)
+        # print(wordListJson)
+        with open('vocabulary.json', 'w') as outfile:
             json.dump([ob.__dict__ for ob in wordList], outfile, indent=4)
         print('Vocabulary made into json')
+        
+        with open('poslist.json', 'w') as outfile:
+            json.dump(partOfSpeechList, outfile, indent=4)
+
+        with open('lessonlist.json', 'w') as outfile:
+            json.dump(lessonList, outfile, indent=4)
+
         quit()
         return wordList, partOfSpeechList, lessonList
 
@@ -241,19 +248,19 @@ class VocabularyBuilder:
         for posElem in splitPOS:
             posElem = posElem.strip()
             if posElem == 'n':
-                convertedPosElem = 'n'
+                convertedPosElem = 'noun'
             elif posElem == 'v':
-                convertedPosElem = 'v'
+                convertedPosElem = 'verb'
             elif posElem == 'adverb':
-                convertedPosElem = 'adv'
+                convertedPosElem = 'adverb'
             elif posElem == 'な-adj':
-                convertedPosElem = 'naadj'
+                convertedPosElem = 'na-adj'
             elif posElem == 'い-adj':
-                convertedPosElem = 'iadj'
+                convertedPosElem = 'i-adj'
             elif posElem == 'exp':
                 convertedPosElem = 'exp'
             elif posElem == 'counter':
-                convertedPosElem = 'ctr'
+                convertedPosElem = 'counter'
             elif posElem == 'undefined':
                 convertedPosElem = 'others'
             else: 
